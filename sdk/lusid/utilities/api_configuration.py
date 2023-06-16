@@ -123,4 +123,3 @@ class ApiConfiguration:
     @access_token.setter
     def access_token(self, value):
         self.__access_token = value
-

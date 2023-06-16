@@ -9,6 +9,23 @@ Name | Type | Description | Notes
 **type** | **str** | The type for the required Compliance Template Parameter | 
 **is_checking_parameter** | **bool** | Indicates whether this is the Compliance Template Parameter that will be used in the final check process | 
 
+## Example
+
+```python
+from lusid.models.compliance_template_parameter import ComplianceTemplateParameter
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of ComplianceTemplateParameter from a JSON string
+compliance_template_parameter_instance = ComplianceTemplateParameter.from_json(json)
+# print the JSON string representation of the object
+print ComplianceTemplateParameter.to_json()
+
+# convert the object into a dict
+compliance_template_parameter_dict = compliance_template_parameter_instance.to_dict()
+# create an instance of ComplianceTemplateParameter from a dict
+compliance_template_parameter_form_dict = compliance_template_parameter.from_dict(compliance_template_parameter_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

@@ -1,6 +1,6 @@
 # lusid.ComplianceGenericApi
 
-All URIs are relative to *https://fbn-prd.lusid.com/api*
+All URIs are relative to *https://fbn-ci.lusid.com/api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -21,41 +21,54 @@ Use this endpoint to fetch a specific compliance template.
 ```python
 from __future__ import print_function
 import time
+import os
 import lusid
+from lusid import ApiClientFactory
 from lusid.rest import ApiException
+from lusid.models.compliance_template import ComplianceTemplate
 from pprint import pprint
-# Defining the host is optional and defaults to https://fbn-prd.lusid.com/api
-# See configuration.py for a list of all supported configuration parameters.
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
-)
+
+api_url = "https://fbn-ci.lusid.com/api"
+# Path to a secrets.json file containing authentication credentials
+# See https://support.lusid.com/knowledgebase/article/KA-01667/en-us
+# for a detailed guide to setting up the SDK make authenticated calls to LUSID APIs
+secrets_path = os.getenv("FBN_SECRETS_PATH")
+app_name="LusidJupyterNotebook"
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
 
-# Configure OAuth2 access token for authorization: oauth2
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
+access_token = os.getenv("ACCESS_TOKEN")
+
+
+# Use the lusid ApiClientFactory to build Api instances with a configured api client
+# The ApiClientFactory will use the api_url and token if passed as parameters
+# Or the secrets in the secrets file at secrets_path
+# Or configured environment variables 
+# To configure an api_client to make calls to LUSID APIs
+api_client_factory = ApiClientFactory(
+    api_url=api_url, 
+    token=access_token,
+    secrets_path=secrets_path, 
+    app_name=app_name
 )
-configuration.access_token = 'YOUR_ACCESS_TOKEN'
-
-# Enter a context with an instance of the API client
-with lusid.ApiClient(configuration) as api_client:
+# Enter a context with an instance of the ApiClientFactory to ensure the connection pool is closed after use
+async with api_client_factory:
     # Create an instance of the API class
-    api_instance = lusid.ComplianceGenericApi(api_client)
+    api_instance = api_client_factory.build(lusid.ComplianceGenericApi)
     scope = 'scope_example' # str | Scope of TemplateID
-code = 'code_example' # str | Code of TemplateID
-as_at = '2013-10-20T19:20:30+01:00' # datetime | Optional. The time at which to get results from. Default : latest (optional)
+    code = 'code_example' # str | Code of TemplateID
+    as_at = '2013-10-20T19:20:30+01:00' # datetime | Optional. The time at which to get results from. Default : latest (optional)
 
     try:
         # [EARLY ACCESS] GetComplianceTemplate: Get the requested compliance template.
-        api_response = api_instance.get_compliance_template(scope, code, as_at=as_at)
+        api_response = await api_instance.get_compliance_template(scope, code, as_at=as_at)
+        print("The response of ComplianceGenericApi->get_compliance_template:\n")
         pprint(api_response)
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling ComplianceGenericApi->get_compliance_template: %s\n" % e)
 ```
+
 
 ### Parameters
 
@@ -100,43 +113,56 @@ Use this endpoint to fetch a list of all available compliance template ids.
 ```python
 from __future__ import print_function
 import time
+import os
 import lusid
+from lusid import ApiClientFactory
 from lusid.rest import ApiException
+from lusid.models.paged_resource_list_of_compliance_template import PagedResourceListOfComplianceTemplate
 from pprint import pprint
-# Defining the host is optional and defaults to https://fbn-prd.lusid.com/api
-# See configuration.py for a list of all supported configuration parameters.
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
-)
+
+api_url = "https://fbn-ci.lusid.com/api"
+# Path to a secrets.json file containing authentication credentials
+# See https://support.lusid.com/knowledgebase/article/KA-01667/en-us
+# for a detailed guide to setting up the SDK make authenticated calls to LUSID APIs
+secrets_path = os.getenv("FBN_SECRETS_PATH")
+app_name="LusidJupyterNotebook"
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
 
-# Configure OAuth2 access token for authorization: oauth2
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
+access_token = os.getenv("ACCESS_TOKEN")
+
+
+# Use the lusid ApiClientFactory to build Api instances with a configured api client
+# The ApiClientFactory will use the api_url and token if passed as parameters
+# Or the secrets in the secrets file at secrets_path
+# Or configured environment variables 
+# To configure an api_client to make calls to LUSID APIs
+api_client_factory = ApiClientFactory(
+    api_url=api_url, 
+    token=access_token,
+    secrets_path=secrets_path, 
+    app_name=app_name
 )
-configuration.access_token = 'YOUR_ACCESS_TOKEN'
-
-# Enter a context with an instance of the API client
-with lusid.ApiClient(configuration) as api_client:
+# Enter a context with an instance of the ApiClientFactory to ensure the connection pool is closed after use
+async with api_client_factory:
     # Create an instance of the API class
-    api_instance = lusid.ComplianceGenericApi(api_client)
+    api_instance = api_client_factory.build(lusid.ComplianceGenericApi)
     as_at = '2013-10-20T19:20:30+01:00' # datetime | Optional. The time at which to get results from. Default : latest (optional)
-page = 'page_example' # str | Optional. The pagination token to use to continue listing compliance runs from a previous call to list compliance runs.              This value is returned from the previous call. If a pagination token is provided the sortBy, filter, and asAt fields              must not have changed since the original request. Also, if set, a start value cannot be provided. (optional)
-start = 56 # int | Optional. When paginating, skip this number of results. (optional)
-limit = 56 # int | Optional. When paginating, limit the number of returned results to this many. (optional)
-filter = 'filter_example' # str | Optional. Expression to filter the result set. Read more about filtering results from LUSID here https://support.lusid.com/filtering-results-from-lusid. (optional)
+    page = 'page_example' # str | Optional. The pagination token to use to continue listing compliance runs from a previous call to list compliance runs.              This value is returned from the previous call. If a pagination token is provided the sortBy, filter, and asAt fields              must not have changed since the original request. Also, if set, a start value cannot be provided. (optional)
+    start = 56 # int | Optional. When paginating, skip this number of results. (optional)
+    limit = 56 # int | Optional. When paginating, limit the number of returned results to this many. (optional)
+    filter = 'filter_example' # str | Optional. Expression to filter the result set. Read more about filtering results from LUSID here https://support.lusid.com/filtering-results-from-lusid. (optional)
 
     try:
         # [EARLY ACCESS] ListComplianceTemplates: Get a specific compliance template
-        api_response = api_instance.list_compliance_templates(as_at=as_at, page=page, start=start, limit=limit, filter=filter)
+        api_response = await api_instance.list_compliance_templates(as_at=as_at, page=page, start=start, limit=limit, filter=filter)
+        print("The response of ComplianceGenericApi->list_compliance_templates:\n")
         pprint(api_response)
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling ComplianceGenericApi->list_compliance_templates: %s\n" % e)
 ```
+
 
 ### Parameters
 

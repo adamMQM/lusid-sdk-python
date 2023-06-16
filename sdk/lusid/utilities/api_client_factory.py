@@ -1,12 +1,6 @@
-import functools
-import importlib
-import inspect
-
-from lusid import ApiClient
 from lusid.utilities.api_client_builder import ApiClientBuilder
 from lusid.utilities.proxy_config import ProxyConfig
 from lusid.utilities.api_configuration import ApiConfiguration
-from lusid.utilities.lusid_retry import lusidretry
 
 
 class ApiClientFactory:
@@ -71,62 +65,11 @@ class ApiClientFactory:
         :return: Initalised LUSID API for the type passed in
         """
 
-        def get_attribute_impl(source_obj, name):
-            """
-            Implementation of __getattribute__ that adds a decorator that adds a call_info
-            argument to return additional call stats
-            """
+        return metaclass(self.api_client)
+    
+    async def __aenter__(self):
+        await self.api_client.__aenter__()
+        return self
 
-            attr = super(metaclass, source_obj).__getattribute__(name)
-
-            @functools.wraps(attr)
-            @lusidretry
-            def wrapper(*args, **kwargs):
-                def is_http_info_method(m):
-                    return inspect.ismethod(m) and m.__name__.endswith(
-                        "_with_http_info"
-                    )
-
-                if kwargs.get("call_info") is not None:
-                    callback = kwargs.pop("call_info")
-
-                    if not inspect.isfunction(callback):
-                        raise ValueError("call_info value must be a lambda")
-
-                    if is_http_info_method(attr):
-                        result = attr(*args, **kwargs)
-                    else:
-                        #   switch to the '_with_http_info' implementation
-                        func = getattr(source_obj, f"{name}_with_http_info")
-                        result = func(*args, **kwargs)
-
-                    # pass the http info to caller
-                    callback(result[2])
-
-                    # return the dto
-                    return result[0]
-
-                else:
-                    return attr(*args, **kwargs)
-
-            return wrapper if inspect.ismethod(attr) else attr
-
-        def init_impl(dest, src=None):
-            if type(dest) == type(src):
-                dest.__dict__ = src.__dict__
-            elif type(src) == ApiClient:
-                dest.api_client = src
-
-        module = importlib.import_module("lusid.api")
-        api_name = metaclass.__name__
-
-        if not api_name.endswith("Api") or not hasattr(module, api_name):
-            raise TypeError(f"unknown api: {api_name}")
-
-        # create an instance of the api
-        api_impl = getattr(module, api_name)(self.api_client)
-
-        setattr(metaclass, "__getattribute__", get_attribute_impl)
-        setattr(metaclass, "__init__", init_impl)
-
-        return api_impl
+    async def __aexit__(self, exc_type, exc_value, exc_tb):
+        await self.api_client.__aexit__(exc_type, exc_value, exc_tb)

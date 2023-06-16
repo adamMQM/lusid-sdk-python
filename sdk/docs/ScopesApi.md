@@ -1,6 +1,6 @@
 # lusid.ScopesApi
 
-All URIs are relative to *https://fbn-prd.lusid.com/api*
+All URIs are relative to *https://fbn-ci.lusid.com/api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -20,39 +20,52 @@ List all the scopes that contain data.
 ```python
 from __future__ import print_function
 import time
+import os
 import lusid
+from lusid import ApiClientFactory
 from lusid.rest import ApiException
+from lusid.models.resource_list_of_scope_definition import ResourceListOfScopeDefinition
 from pprint import pprint
-# Defining the host is optional and defaults to https://fbn-prd.lusid.com/api
-# See configuration.py for a list of all supported configuration parameters.
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
-)
+
+api_url = "https://fbn-ci.lusid.com/api"
+# Path to a secrets.json file containing authentication credentials
+# See https://support.lusid.com/knowledgebase/article/KA-01667/en-us
+# for a detailed guide to setting up the SDK make authenticated calls to LUSID APIs
+secrets_path = os.getenv("FBN_SECRETS_PATH")
+app_name="LusidJupyterNotebook"
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
 
-# Configure OAuth2 access token for authorization: oauth2
-configuration = lusid.Configuration(
-    host = "https://fbn-prd.lusid.com/api"
+access_token = os.getenv("ACCESS_TOKEN")
+
+
+# Use the lusid ApiClientFactory to build Api instances with a configured api client
+# The ApiClientFactory will use the api_url and token if passed as parameters
+# Or the secrets in the secrets file at secrets_path
+# Or configured environment variables 
+# To configure an api_client to make calls to LUSID APIs
+api_client_factory = ApiClientFactory(
+    api_url=api_url, 
+    token=access_token,
+    secrets_path=secrets_path, 
+    app_name=app_name
 )
-configuration.access_token = 'YOUR_ACCESS_TOKEN'
-
-# Enter a context with an instance of the API client
-with lusid.ApiClient(configuration) as api_client:
+# Enter a context with an instance of the ApiClientFactory to ensure the connection pool is closed after use
+async with api_client_factory:
     # Create an instance of the API class
-    api_instance = lusid.ScopesApi(api_client)
+    api_instance = api_client_factory.build(lusid.ScopesApi)
     filter = 'filter_example' # str | Expression to filter the result set.              For example, to filter on the Scope, use \"scope eq 'string'\"              Read more about filtering results from LUSID here https://support.lusid.com/filtering-results-from-lusid. (optional)
 
     try:
         # ListScopes: List Scopes
-        api_response = api_instance.list_scopes(filter=filter)
+        api_response = await api_instance.list_scopes(filter=filter)
+        print("The response of ScopesApi->list_scopes:\n")
         pprint(api_response)
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling ScopesApi->list_scopes: %s\n" % e)
 ```
+
 
 ### Parameters
 

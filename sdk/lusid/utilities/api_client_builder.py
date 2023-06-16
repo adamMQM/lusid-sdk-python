@@ -2,9 +2,10 @@ import os
 
 from urllib3 import make_headers
 
-from lusid import Configuration, ApiClient
-from .api_configuration_loader import ApiConfigurationLoader
-from .refreshing_token import RefreshingToken
+from lusid.configuration import Configuration
+from lusid.utilities.retry import RetryingClient
+from lusid.utilities.api_configuration_loader import ApiConfigurationLoader
+from lusid.utilities.refreshing_token import RefreshingToken
 
 
 class ApiClientBuilder:
@@ -131,7 +132,7 @@ class ApiClientBuilder:
                 )
 
         # Create and return the ApiClient
-        api_client = ApiClient(configuration=config)
+        api_client = RetryingClient(configuration=config)
 
         # set the application name if specified
         if configuration.app_name is not None:
